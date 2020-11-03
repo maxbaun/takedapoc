@@ -1,24 +1,20 @@
 import logo from './logo.svg';
 import './App.css';
+import { useEffect } from 'react';
+import Deform from './Deform';
+import Deform2 from './Deform2';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
+import Swap from './Swap';
+import Track from './Track';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <Route component={Deform} path="/deform" />
+      <Route component={Deform2} path="/deform2" />
+      <Route component={Swap} path="/swap" />
+      <Route component={Track} path="/track" />
+    </Router>
   );
 }
 

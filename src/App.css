@@ -1,7 +1,3 @@
-.App {
-  text-align: center;
-}
-
 .App-logo {
   height: 40vmin;
   pointer-events: none;
@@ -35,4 +31,20 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+#container {
+  position: relative;
+  width: 700px;
+  height: 500px;
+  /*margin : 0px auto;*/
+}
+
+#overlay,
+#webgl {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  -ms-filter: fliph; /*IE*/
+  filter: fliph; /*IE*/
 }
