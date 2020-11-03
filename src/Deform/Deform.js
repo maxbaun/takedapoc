@@ -33,6 +33,7 @@ function Deform() {
         drawLoop();
 
         function drawLoop() {
+          // eslint-disable-next-line
           drawRequest = requestAnimationFrame(drawLoop);
           overlayCC.clearRect(0, 0, 720, 576);
           if (ctrack.getCurrentPosition()) {
@@ -42,6 +43,7 @@ function Deform() {
 
         var fd = new window.faceDeformer();
 
+        // eslint-disable-next-line
         var mouth_vertices = [
           [44, 45, 61, 44],
           [45, 46, 61, 45],
@@ -67,6 +69,7 @@ function Deform() {
           [50, 58, 59, 50],
         ];
 
+        // eslint-disable-next-line
         var extendVertices = [
           [0, 71, 72, 0],
           [0, 72, 1, 0],
@@ -119,6 +122,7 @@ function Deform() {
         function drawMaskLoop() {
           var pos = ctrack.getCurrentPosition();
 
+          // eslint-disable-next-line
           var tempPos;
           var addPos = [];
           // for (var i = 0; i < 23; i++) {

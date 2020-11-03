@@ -144,6 +144,7 @@ function Swap() {
 
       var ctrack = new window.clm.tracker();
       ctrack.init(window.pModel);
+      // eslint-disable-next-line
       var trackingStarted = false;
 
       var fd = new window.faceDeformer();
@@ -169,7 +170,8 @@ function Swap() {
           imageCanvases[elementId] = imagecanvas;
 
           imageCount += 1;
-          if (imageCount == images.length) {
+          if (imageCount === images.length) {
+            // eslint-disable-next-line
             imagesReady = true;
           }
         };
@@ -250,6 +252,7 @@ function Swap() {
           console.log(JSON.stringify(positions));
           switchMasks(positions);
         } else {
+          // eslint-disable-next-line
           detectionRequest = requestAnimationFrame(drawGridLoop);
         }
       }
@@ -328,12 +331,14 @@ function Swap() {
           newcanvas.getContext('2d').putImageData(result, 0, 0);
           // get mask
 
+          // eslint-disable-next-line
           var maskname = Object.keys(masks)[currentMask];
           fd.load(newcanvas, pos, window.pModel);
           animationRequest = requestAnimationFrame(drawMaskLoop);
         });
 
         function drawMaskLoop() {
+          // eslint-disable-next-line
           animationRequest = requestAnimationFrame(drawMaskLoop);
           // get position of face
           positions = ctrack.getCurrentPosition();

@@ -1,6 +1,4 @@
-import logo from './logo.svg';
 import './App.css';
-import { useEffect } from 'react';
 import Deform from './Deform';
 import Deform2 from './Deform2';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
