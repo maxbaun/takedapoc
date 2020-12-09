@@ -53,7 +53,7 @@ const Track = () => {
 
       drawLoop();
     };
-    img.src = './hae3.jpg';
+    img.src = './face0.jpg';
   }, []);
 
   return (
