@@ -8,6 +8,8 @@ import createChinDisplacement from './createChinDisplacement';
 import createLeftEyeDisplacement from './createLeftEyeDisplacement';
 import createRightEyeDisplacement from './createRightEyeDisplacement';
 import qs from 'query-string';
+import createRightEyeDisplacement2 from './createRightEyeDisplacement2';
+import createChinDisplacement2 from './createChinDisplacement2';
 
 const Faceapi = () => {
   useEffect(() => {
@@ -112,6 +114,10 @@ const Faceapi = () => {
               .add('jawr', '/maps/new/jawr2.png')
               .add('eyel2', '/maps/new/eyel2.png')
               .add('eyer2', '/maps/new/eyer2.png')
+              .add('eyer3', '/maps/new/eyer3.png')
+              .add('eyer4', '/maps/new/eyer4.png')
+              .add('eyer5', '/maps/new/eyer5.png')
+              .add('eyer6', '/maps/new/eyer6.png')
               .add('mouth', '/maps/new/mouth.png')
               .add('mouthl', '/maps/new/mouthl.png')
               .add('mouthr', '/maps/new/mouthr.png')
@@ -120,7 +126,8 @@ const Faceapi = () => {
               .add('mouth5', '/maps/new/mouth5.png')
               .add('chinfull', '/maps/new/chinfull.png')
               .add('chinfull2', '/maps/new/chinfull2.png')
-              .add('chinfull3', '/maps/new/chinfull3.png');
+              .add('chinfull3', '/maps/new/chinfull3.png')
+              .add('chinfull4', '/maps/new/chinfull4.png');
 
             const { resources } = await new Promise((resolve) => {
               loader.load((l, r) => {
@@ -153,6 +160,17 @@ const Faceapi = () => {
             );
 
             const {
+              filterFull: chinFilterFull2,
+              spriteFull: chinSpriteFull2,
+            } = createChinDisplacement2(
+              resources,
+              jawOutline,
+              rightEyeOutliine,
+              leftEyeOutliine,
+              mouthOutline
+            );
+
+            const {
               filter: leftEyeFilter,
               sprite: leftEyeSprite,
             } = createLeftEyeDisplacement(
@@ -165,6 +183,15 @@ const Faceapi = () => {
               filter: rightEyeFilter,
               sprite: rightEyeSprite,
             } = createRightEyeDisplacement(
+              resources,
+              rightEyeOutliine,
+              jawOutline
+            );
+
+            const {
+              filter: rightEyeFilter2,
+              sprite: rightEyeSprite2,
+            } = createRightEyeDisplacement2(
               resources,
               rightEyeOutliine,
               jawOutline
@@ -203,10 +230,12 @@ const Faceapi = () => {
 
             pixiApp.stage.addChild(
               leftEyeSprite,
-              rightEyeSprite,
+              // rightEyeSprite,
+              rightEyeSprite2,
               // chinSprite,
               // chinSpriteR,
-              chinSpriteFull,
+              // chinSpriteFull,
+              chinSpriteFull2,
               mouthSpriteFull
               // mouthSprite,
               // mouthSpriteR,
@@ -221,10 +250,12 @@ const Faceapi = () => {
             // pixiApp.stage.filters = [displaceFilter];
             pixiApp.stage.filters = [
               leftEyeFilter,
-              rightEyeFilter,
+              // rightEyeFilter,
+              rightEyeFilter2,
               // chinFilter,
               // chinFilterR,
-              chinFilterFull,
+              // chinFilterFull,
+              chinFilterFull2,
               mouthFilterFull,
               // mouthFilter,
               // mouthFilterR,
@@ -269,7 +300,7 @@ const Faceapi = () => {
 
             function onPointerMove(eventData) {
               console.log(eventData.data.global.x, eventData.data.global.y);
-              // chinSpriteFull.position.set(
+              // chinSpriteFull2.position.set(
               //   eventData.data.global.x,
               //   eventData.data.global.y
               // );
