@@ -20,6 +20,8 @@ const Faceapi = () => {
     const imageCanvas = document.getElementById('imageCanvas');
     const imageCanvasContext = imageCanvas.getContext('2d');
 
+    const videoWrap = document.getElementById('videoWrap');
+
     const pixiCanvas = document.getElementById('pixiCanvas');
 
     imageCanvas.width = camVideo.offsetWidth;
@@ -33,11 +35,49 @@ const Faceapi = () => {
       .then(async (res) => {
         const { image: imagePath } = qs.parse(window.location.search);
 
-        console.log(imagePath);
-
         // const detection = await faceapi.detectSingleFace(camVideo);
         await faceapi.nets.ssdMobilenetv1.loadFromUri('/weights');
         await faceapi.nets.faceLandmark68Net.loadFromUri('/weights');
+
+        // Live facial feature detecting
+        const videoCanvas = faceapi.createCanvasFromMedia(camVideo);
+        videoCanvas.style.position = 'absolute';
+        videoCanvas.style.left = 0;
+        videoCanvas.style.top = 0;
+        videoCanvas.style.width = '100%';
+        videoCanvas.style.height = '100%';
+        videoCanvas.style.zIndex = 1;
+        videoCanvas.style.transform = 'scale(-1, 1)';
+
+        const displaySizeVideo = {
+          height: camVideo.offsetWidth,
+          width: camVideo.offsetHeight,
+        };
+
+        faceapi.matchDimensions(videoCanvas, displaySizeVideo);
+
+        videoWrap.appendChild(videoCanvas);
+
+        setInterval(async () => {
+          const detectionVideo = await faceapi
+            .detectSingleFace(camVideo)
+            .withFaceLandmarks();
+
+          if (!detectionVideo) {
+            return;
+          }
+
+          videoCanvas
+            .getContext('2d')
+            .clearRect(0, 0, videoCanvas.width, videoCanvas.height);
+
+          const resizedDetectionsVideo = faceapi.resizeResults(
+            detectionVideo,
+            displaySizeVideo
+          );
+
+          faceapi.draw.drawFaceLandmarks(videoCanvas, resizedDetectionsVideo);
+        }, 100);
 
         const takeBtn = document.getElementById('take');
         takeBtn.disabled = false;
@@ -327,7 +367,12 @@ const Faceapi = () => {
 
   return (
     <div>
-      <video id="webcamVideo"></video>
+      <div
+        id="videoWrap"
+        style={{ display: 'inline-block', position: 'relative' }}
+      >
+        <video id="webcamVideo"></video>
+      </div>
 
       <button disabled id="take">
         Take
