@@ -1,6 +1,6 @@
 // implements nodejs wrappers for HTMLCanvasElement, HTMLImageElement, ImageData
 import * as faceapi from 'face-api.js';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import WebcamEasy from 'webcam-easy';
 import * as PIXI from 'pixi.js';
 import createMouthDisplacement from './createMouthDisplacement';
@@ -12,10 +12,14 @@ import createRightEyeDisplacement2 from './createRightEyeDisplacement2';
 import createChinDisplacement2 from './createChinDisplacement2';
 
 const Faceapi = () => {
+  const [snapCount, setSnapCount] = useState(0);
+
   useEffect(() => {
     const camVideo = document.getElementById('webcamVideo');
     const snapCanvas = document.getElementById('snapCanvas');
     const webcam = new WebcamEasy(camVideo, 'user', snapCanvas);
+
+    const btnReset = document.getElementById('reset');
 
     const imageCanvas = document.getElementById('imageCanvas');
     const imageCanvasContext = imageCanvas.getContext('2d');
@@ -29,6 +33,12 @@ const Faceapi = () => {
 
     pixiCanvas.width = camVideo.offsetWidth;
     pixiCanvas.height = camVideo.offsetHeight;
+
+    // btnReset.addEventListener('click', () => {
+    //   pixiCanvas
+    //     .getContext('2d')
+    //     .clearRect(0, 0, pixiCanvas.width, pixiCanvas.width);
+    // });
 
     webcam
       .start()
@@ -57,6 +67,29 @@ const Faceapi = () => {
         faceapi.matchDimensions(videoCanvas, displaySizeVideo);
 
         videoWrap.appendChild(videoCanvas);
+
+        const helperCanvas = document.getElementById('helperCanvas');
+        const rectGraphics = new PIXI.Graphics();
+
+        rectGraphics.lineStyle(5, 0xff0000);
+
+        const rect = {
+          x: camVideo.offsetWidth / 4,
+          y: camVideo.offsetHeight / 18,
+          width: (camVideo.offsetWidth / 4) * 2,
+          height: (camVideo.offsetWidth / 8) * 5,
+        };
+
+        rectGraphics.drawRect(rect.x, rect.y, rect.width, rect.height);
+
+        const pixiRect = new PIXI.Application({
+          height: camVideo.offsetHeight,
+          width: camVideo.offsetWidth,
+          view: helperCanvas,
+          transparent: true,
+        });
+
+        pixiRect.stage.addChild(rectGraphics);
 
         setInterval(async () => {
           const detectionVideo = await faceapi
@@ -372,11 +405,23 @@ const Faceapi = () => {
         style={{ display: 'inline-block', position: 'relative' }}
       >
         <video id="webcamVideo"></video>
+        <canvas
+          id="helperCanvas"
+          style={{
+            position: 'absolute',
+            height: '100%',
+            width: '100%',
+            zIndex: 1,
+            left: 0,
+            top: 0,
+          }}
+        ></canvas>
       </div>
 
       <button disabled id="take">
         Take
       </button>
+      <button id="reset">Reset</button>
       <canvas id="snapCanvas"></canvas>
       <canvas id="imageCanvas"></canvas>
       <canvas id="pixiCanvas"></canvas>
