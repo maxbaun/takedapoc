@@ -12,12 +12,15 @@ import createRightEyeDisplacement2 from './createRightEyeDisplacement2';
 import createChinDisplacement2 from './createChinDisplacement2';
 
 const Faceapi = () => {
-  const [snapCount, setSnapCount] = useState(0);
-
   useEffect(() => {
+    let snapCount = 0;
     const camVideo = document.getElementById('webcamVideo');
     const snapCanvas = document.getElementById('snapCanvas');
     const webcam = new WebcamEasy(camVideo, 'user', snapCanvas);
+
+    const snapCountInput = document.getElementById('snapCount');
+
+    snapCountInput.setAttribute('value', snapCount);
 
     const btnReset = document.getElementById('reset');
 
@@ -34,14 +37,60 @@ const Faceapi = () => {
     pixiCanvas.width = camVideo.offsetWidth;
     pixiCanvas.height = camVideo.offsetHeight;
 
-    // btnReset.addEventListener('click', () => {
-    //   pixiCanvas
-    //     .getContext('2d')
-    //     .clearRect(0, 0, pixiCanvas.width, pixiCanvas.width);
-    // });
+    const pixiApp = new PIXI.Application({
+      height: imageCanvas.offsetHeight,
+      width: imageCanvas.offsetWidth,
+      view: pixiCanvas,
+      transparent: true,
+    });
+
+    const container = new PIXI.Container();
+
+    let detectInterval = null;
+
+    pixiApp.stage.interactive = true;
+
+    const destroyPixiApp = () => {
+      while (pixiApp.stage.children[0]) {
+        pixiApp.stage.removeChild(pixiApp.stage.children[0]);
+      }
+
+      pixiApp.stage.filters = [];
+
+      // pixiApp.stage.destroy(true);
+      // pixiApp.stage = null;
+
+      // pixiApp.renderer.destroy(true);
+      // pixiApp.renderer = null;
+    };
+
+    const reset = () => {
+      // clearInterval(detectInterval);
+      destroyPixiApp();
+
+      imageCanvasContext.clearRect(0, 0, imageCanvas.width, imageCanvas.height);
+      snapCanvas
+        .getContext('2d')
+        .clearRect(0, 0, snapCanvas.width, snapCanvas.height);
+
+      if (snapCount + 1 <= 3) {
+        snapCount += 1;
+        snapCountInput.setAttribute('value', snapCount);
+      } else {
+        snapCount = 0;
+        snapCountInput.setAttribute('value', 0);
+      }
+    };
+
+    btnReset.addEventListener('click', () => {
+      reset();
+    });
 
     webcam
       .start()
+      .catch(() => {
+        alert('Failed to load webcam, please refresh the page.');
+      })
       .then(async (res) => {
         const { image: imagePath } = qs.parse(window.location.search);
 
@@ -91,7 +140,7 @@ const Faceapi = () => {
 
         pixiRect.stage.addChild(rectGraphics);
 
-        setInterval(async () => {
+        detectInterval = setInterval(async () => {
           const detectionVideo = await faceapi
             .detectSingleFace(camVideo)
             .withFaceLandmarks();
@@ -151,16 +200,6 @@ const Faceapi = () => {
             );
 
             faceapi.draw.drawFaceLandmarks(imageCanvas, resizedDetections);
-
-            const pixiApp = new PIXI.Application({
-              height: imageCanvas.offsetHeight,
-              width: imageCanvas.offsetWidth,
-              view: pixiCanvas,
-            });
-
-            const container = new PIXI.Container();
-
-            pixiApp.stage.interactive = true;
 
             var bg = PIXI.Sprite.from(image);
             bg.width = pixiApp.view.width;
@@ -301,18 +340,33 @@ const Faceapi = () => {
             //   // chinSprite
             // );
 
-            pixiApp.stage.addChild(
-              leftEyeSprite,
-              // rightEyeSprite,
-              rightEyeSprite2,
-              // chinSprite,
-              // chinSpriteR,
-              // chinSpriteFull,
-              chinSpriteFull2,
-              mouthSpriteFull
-              // mouthSprite,
-              // mouthSpriteR,
+            const sc = parseInt(
+              document.getElementById('snapCount').getAttribute('value'),
+              10
             );
+
+            const shouldShowEyes = sc === 0 || sc === 1;
+            const shouldShowMouth = sc === 0 || sc === 2;
+            const shouldShowChin = sc === 0 || sc === 3;
+
+            if (shouldShowEyes) {
+              pixiApp.stage.addChild(leftEyeSprite, rightEyeSprite2);
+            }
+
+            if (shouldShowMouth) {
+              pixiApp.stage.addChild(mouthSpriteFull);
+            }
+
+            if (shouldShowChin) {
+              pixiApp.stage.addChild(chinSpriteFull2);
+            }
+
+            // pixiApp.stage.addChild(
+            //   leftEyeSprite,
+            //   rightEyeSprite2,
+            //   chinSpriteFull2,
+            //   mouthSpriteFull
+            // );
 
             // const displaceFilter = new PIXI.filters.DisplacementFilter(
             //   sprite,
@@ -322,17 +376,11 @@ const Faceapi = () => {
 
             // pixiApp.stage.filters = [displaceFilter];
             pixiApp.stage.filters = [
-              leftEyeFilter,
-              // rightEyeFilter,
-              rightEyeFilter2,
-              // chinFilter,
-              // chinFilterR,
-              // chinFilterFull,
-              chinFilterFull2,
-              mouthFilterFull,
-              // mouthFilter,
-              // mouthFilterR,
-            ];
+              shouldShowEyes ? leftEyeFilter : null,
+              shouldShowEyes ? rightEyeFilter2 : null,
+              shouldShowChin ? chinFilterFull2 : null,
+              shouldShowMouth ? mouthFilterFull : null,
+            ].filter((f) => f);
 
             // pixiApp.stage.filterArea = pixiApp.screen;
 
@@ -367,9 +415,9 @@ const Faceapi = () => {
 
             // pixiApp.stage.addChild(chinLine);
 
-            pixiApp.stage
-              .on('mousemove', onPointerMove)
-              .on('touchmove', onPointerMove);
+            // pixiApp.stage
+            //   .on('mousemove', onPointerMove)
+            //   .on('touchmove', onPointerMove);
 
             function onPointerMove(eventData) {
               console.log(eventData.data.global.x, eventData.data.global.y);
@@ -399,33 +447,36 @@ const Faceapi = () => {
   }, []);
 
   return (
-    <div>
-      <div
-        id="videoWrap"
-        style={{ display: 'inline-block', position: 'relative' }}
-      >
-        <video id="webcamVideo"></video>
-        <canvas
-          id="helperCanvas"
-          style={{
-            position: 'absolute',
-            height: '100%',
-            width: '100%',
-            zIndex: 1,
-            left: 0,
-            top: 0,
-          }}
-        ></canvas>
-      </div>
+    <>
+      <div>
+        <div
+          id="videoWrap"
+          style={{ display: 'inline-block', position: 'relative' }}
+        >
+          <video id="webcamVideo"></video>
+          <canvas
+            id="helperCanvas"
+            style={{
+              position: 'absolute',
+              height: '100%',
+              width: '100%',
+              zIndex: 1,
+              left: 0,
+              top: 0,
+            }}
+          ></canvas>
+        </div>
 
-      <button disabled id="take">
-        Take
-      </button>
-      <button id="reset">Reset</button>
-      <canvas id="snapCanvas"></canvas>
-      <canvas id="imageCanvas"></canvas>
-      <canvas id="pixiCanvas"></canvas>
-    </div>
+        <button disabled id="take">
+          Take
+        </button>
+        <button id="reset">Reset</button>
+        <canvas id="snapCanvas"></canvas>
+        <canvas id="imageCanvas"></canvas>
+        <canvas id="pixiCanvas"></canvas>
+      </div>
+      <input id="snapCount" type="hidden" />
+    </>
   );
 };
 
